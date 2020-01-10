@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +41,16 @@ public class ClockService {
     public ClockService(SysParamDAO sysParamDAO){
         this.sysParamDAO = sysParamDAO;
     }
+
+
+    public void auth(String code) {
+        SysParamDO paramDO = sysParamDAO.findOneByCode("clock_auth");
+        String value = paramDO.getValue();
+        if (!code.equals(value)){
+            throw new CustomException("授权码校验失败！");
+        }
+    }
+
 
     public List<User> getUser(){
         SysParamDO paramDO = sysParamDAO.findOneByCode("clock_users");
@@ -119,4 +130,6 @@ public class ClockService {
         }
 
     }
+
+
 }

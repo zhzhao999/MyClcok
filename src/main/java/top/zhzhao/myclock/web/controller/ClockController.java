@@ -3,9 +3,11 @@
  */
 package top.zhzhao.myclock.web.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import top.zhzhao.myclock.dao.dataobj.SysParamDO;
+import top.zhzhao.myclock.exception.CustomException;
 import top.zhzhao.myclock.service.ClockService;
 import top.zhzhao.myclock.util.response.ResponseVO;
 import top.zhzhao.myclock.util.response.ResponseVOUtils;
@@ -29,6 +31,18 @@ public class ClockController {
         this.clockService = clockService;
     }
 
+
+    @PostMapping(path = "/auth")
+    @ResponseBody
+    public ResponseVO auth(@RequestParam String code){
+        if (StringUtils.isBlank(code)){
+            throw new CustomException("授权码不能为空");
+        }
+        //获取用户详情
+        clockService.auth(code);
+        //返回
+        return ResponseVOUtils.success();
+    }
 
     @GetMapping(path = "/jbf/user")
     @ResponseBody
