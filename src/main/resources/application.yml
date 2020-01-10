@@ -1,0 +1,28 @@
+server:
+  port: 7476
+
+logging:
+  level:
+    root: info
+  path: /usr/log/clock/
+  file:
+    max-size: 20MB
+    max-history: 10
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+
+spring:
+  #通用数据源配置
+  datasource:
+    url: jdbc:mysql://47.98.157.91:3306/clock?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: false
+    hibernate:
+      naming:
+        #驼峰命名
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
