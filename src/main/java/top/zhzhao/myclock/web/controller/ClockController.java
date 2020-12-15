@@ -66,4 +66,13 @@ public class ClockController {
         //返回
         return ResponseVOUtils.success(s);
     }
+
+    @PostMapping(path = "/hx/do")
+    @ResponseBody
+    public ResponseVO doHxClock(){
+        //获取用户详情
+        String result = clockService.clockHx();
+        //返回
+        return ResponseVOUtils.success(result);
+    }
 }
