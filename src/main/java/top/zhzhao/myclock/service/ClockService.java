@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Connection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,18 +22,17 @@ import org.springframework.web.client.RestTemplate;
 import top.zhzhao.myclock.dao.SysParamDAO;
 import top.zhzhao.myclock.dao.dataobj.SysParamDO;
 import top.zhzhao.myclock.exception.CustomException;
+import top.zhzhao.myclock.util.HttpUtils;
 import top.zhzhao.myclock.util.HttpsTemplateUtils;
 import top.zhzhao.myclock.web.vo.Address;
 import top.zhzhao.myclock.web.vo.User;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  *
@@ -162,7 +162,8 @@ public class ClockService {
 //        headers.setAccept(Collections.singletonList(MediaType.ALL));
         headers.set("Origin","https://im.hfbank.com.cn:7778");
         headers.set("X-Requested-With","XMLHttpRequest");
-//        headers.set("Content-Type","application/json; charset=UTF-8");
+        headers.set("Content-Type","application/json");
+//        headers.set("Accept","application/json; charset=UTF-8");
         headers.setAcceptCharset(Collections.singletonList(Charset.defaultCharset()));
         String refStr = "https://im.hfbank.com.cn:7778/webhtml/kaoqing/attendance" +
                 "?account=rxhf15223" +
@@ -202,14 +203,7 @@ public class ClockService {
         log.info("接口返回--"+body);
         try {
             JSONObject jsonObject = JSON.parseObject(body);
-            Object rsp_body = jsonObject.get("RSP_BODY");
-            JSONObject jsonObject1 = JSON.parseObject(rsp_body.toString());
-            Object replyInformation = jsonObject1.get("replyInformation");
-            JSONObject object = JSON.parseObject(replyInformation.toString());
-            Object responseMessage = object.get("responseMessage");
-            if (!"操作成功！".equals(responseMessage.toString())){
-                throw new CustomException(responseMessage.toString());
-            }
+
         }catch (Exception e){
             throw new CustomException(e.getMessage());
         }
@@ -218,4 +212,59 @@ public class ClockService {
 
     }
 
+
+    public String hxDaka(){
+
+        long timeMillis = System.currentTimeMillis();
+
+        String url = "https://im.hfbank.com.cn:7778/webhtml/asi/kqrecordadd";
+        HashMap<String,String> headers = new HashMap<>();
+        headers.put("Host","im.hfbank.com.cn:7778");
+        headers.put("Connection","keep-alive");
+        headers.put("Pragma","no-cache");
+        headers.put("Cache-Control","no-cache");
+//        headers.setAccept(Collections.singletonList(MediaType.ALL));
+        headers.put("Origin","https://im.hfbank.com.cn:7778");
+        headers.put("X-Requested-With","XMLHttpRequest");
+        headers.put("Content-Type","application/json");
+//        headers.set("Accept","application/json; charset=UTF-8");
+        String refStr = "https://im.hfbank.com.cn:7778/webhtml/kaoqing/attendance" +
+                "?account=rxhf15223" +
+                "&longitude=116.351957" +
+                "&fdimension=39.926758" +
+                "&altitude=0.0" +
+                "&addrname=%E5%8C%97%E4%BA%AC%E5%B8%82%E8%A5%BF%E5%9F%8E%E5%8C%BA%E9%98%9C%E6%88%90%E9%97%A8%E5%8C%97%E8%90%A5%E9%97%A8%E4%B8%9C%E9%87%8C" +
+                "&device_type=1&deviceuuid=&orgId=1&wifimac=02:00:00:00:00:00&wifissid=WIFI" +
+                "&time=" + timeMillis +
+                "&rxsig=86D6874763693B5A0BCAAF13DE7E55D8";
+
+        headers.put("Referer",refStr);
+
+        headers.put("Accept-Encoding","gzip, deflate");
+        headers.put("Accept-Language","zh-CN,en-US;q=0.9");
+        headers.put("Cookie","RX-UID=w_zhangzhao; PHPSESSID=eghajpecpr8u305nlf4lanmal4; RX-ASAPPID=kaoqing");
+
+
+
+        HashMap<String, String> map= new HashMap<>();
+        map.put("action", "asi/kqrecordadd");
+        map.put("account", "rxhf15223");
+        map.put("userid", "16203");
+        map.put("addrname", "百万庄大街8号");
+        map.put("longitude", "116.3565140");
+        map.put("fdimension", "39.9334068");
+        map.put("device_type", "1");
+        map.put("deviceuuid", "");
+        map.put("orgId", "1");
+        map.put("wifimac", "02:00:00:00:00:00");
+        map.put("wifissid", "WIFI");
+        map.put("is_field", "0");
+
+        try {
+            Connection.Response post = HttpUtils.post(url,headers, JSON.toJSONString(map));
+            return "成功！！！";
+        } catch (IOException e) {
+            throw new CustomException(e.getMessage());
+        }
+    }
 }
