@@ -22,20 +22,28 @@ public class ResponseVOUtils {
      * @return ResponseVO
      */
     public static <T> ResponseVO<T> success(T datas) {
-        ResponseVO<T> vo = new ResponseVO<T>("200","操作成功");
+        ResponseVO<T> vo = new ResponseVO<>("200", "操作成功");
         vo.setDatas(datas);
         return vo;
     }
 
+
     /**
      * 正确返回（无参）
-     *
-     * @return ResponseVO
      */
     public static <T> ResponseVO<T> success() {
-        return new ResponseVO<T>("200","操作成功");
+        return new ResponseVO<>("200", "操作成功");
     }
 
+
+    /**
+     * 正确返回（无参，自定义提示文字）
+     */
+    public static <T> ResponseVO<T> success(String repMsg) {
+        ResponseVO<T> vo = new ResponseVO<>("200", repMsg);
+        vo.setDatas(null);
+        return vo;
+    }
 
     /**
      * 自定义异常返回VO
@@ -44,18 +52,17 @@ public class ResponseVOUtils {
      * @return ResponseVO
      */
     public static <T> ResponseVO<T> commonError(String errMsg) {
-        ResponseVO<T> vo = new ResponseVO<T>("400", errMsg);
-        return vo;
+        return new ResponseVO<T>("400", errMsg);
     }
 
     /**
      * 自定义Error
      *
-     * @param : errMsg 错误信息
-     * @return : ResponseVO
+     * @param  errMsg 错误信息
+     * @return  ResponseVO
      */
     public static <T> ResponseVO<T> error(String code,String errMsg) {
-        return new ResponseVO<T>(code, errMsg);
+        return new ResponseVO<>(code, errMsg);
     }
 
 }

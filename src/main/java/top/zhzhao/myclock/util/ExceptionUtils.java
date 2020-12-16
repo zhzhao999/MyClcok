@@ -14,11 +14,11 @@ public class ExceptionUtils {
      * 获取异常详细信息
      */
     public static  String getExceptionDetail(Exception e){
-        StringBuffer stringBuffer = new StringBuffer(e.toString() + ":: \n");
+        StringBuilder stringBuffer = new StringBuilder(e.toString() + ":: \n");
         StackTraceElement[] msgs = e.getStackTrace();
         int length = msgs.length;
-        for (int i = 0; i < length; i++) {
-            stringBuffer.append("\t" + msgs[i].toString() + "\n");
+        for (StackTraceElement msg : msgs) {
+            stringBuffer.append("\t").append(msg.toString()).append("\n");
         }
         return stringBuffer.toString();
     }

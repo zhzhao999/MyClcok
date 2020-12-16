@@ -6,11 +6,11 @@ package top.zhzhao.myclock.web.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import top.zhzhao.myclock.dao.dataobj.SysParamDO;
 import top.zhzhao.myclock.exception.CustomException;
 import top.zhzhao.myclock.service.ClockService;
 import top.zhzhao.myclock.util.response.ResponseVO;
 import top.zhzhao.myclock.util.response.ResponseVOUtils;
+import top.zhzhao.myclock.web.vo.HxUser;
 import top.zhzhao.myclock.web.vo.User;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class ClockController {
     @ResponseBody
     public ResponseVO auth(@RequestParam String code){
         if (StringUtils.isBlank(code)){
-            throw new CustomException("授权码不能为空");
+            throw new CustomException("授权码不能为空!");
         }
         //获取用户详情
         clockService.auth(code);
@@ -67,11 +67,26 @@ public class ClockController {
         return ResponseVOUtils.success(s);
     }
 
-    @GetMapping(path = "/hx/do")
+
+    @GetMapping(path = "/hx/user")
     @ResponseBody
-    public ResponseVO doHxClock(){
+    public ResponseVO getHxUser(){
         //获取用户详情
-        String result = clockService.hxDaka();
+        List<HxUser> users = clockService.getHxUser();
+        //筛选用户名
+        ArrayList<String> result = new ArrayList<>();
+        for (HxUser user : users) {
+            result.add(user.getName());
+        }
+        //返回
+        return ResponseVOUtils.success(result);
+    }
+
+    @PostMapping(path = "/hx/do")
+    @ResponseBody
+    public ResponseVO doHxClock(@RequestParam String name){
+        //获取用户详情
+        String result = clockService.doHxClock(name);
         //返回
         return ResponseVOUtils.success(result);
     }

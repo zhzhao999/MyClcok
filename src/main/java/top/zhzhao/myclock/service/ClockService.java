@@ -22,10 +22,14 @@ import top.zhzhao.myclock.dao.SysParamDAO;
 import top.zhzhao.myclock.dao.dataobj.SysParamDO;
 import top.zhzhao.myclock.exception.CustomException;
 import top.zhzhao.myclock.util.HttpUtils;
+import top.zhzhao.myclock.util.UnicodeUtils;
 import top.zhzhao.myclock.web.vo.Address;
+import top.zhzhao.myclock.web.vo.HxUser;
 import top.zhzhao.myclock.web.vo.User;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -62,6 +66,8 @@ public class ClockService {
         return gson.fromJson(value, new TypeToken<List<User>>(){}.getType());
     }
 
+
+
     public String doJBFClock(String name){
         //准备参数
         List<User> userList = getUser();
@@ -78,7 +84,7 @@ public class ClockService {
         //调用接口
         clockJbf(doUser,address);
 
-        return "打卡成功！";
+        return "JBF打卡成功！";
 
     }
 
@@ -95,9 +101,6 @@ public class ClockService {
         return addressList.get(i);
     }
 
-    /**
-     * 调用京北方接口打卡
-     */
     private void clockJbf(User user,Address address){
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://111.203.253.37:8201/nkcisp/mobile-base.action?to=cispInsertPunchCardInfoAction";
@@ -117,7 +120,7 @@ public class ClockService {
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         ResponseEntity<String> response = restTemplate.postForEntity( url, request , String.class );
         String body = response.getBody();
-        log.info("接口返回--"+body);
+        log.info("JBF接口返回--"+body);
         try {
             JSONObject jsonObject = JSON.parseObject(body);
             Object rsp_body = jsonObject.get("RSP_BODY");
@@ -134,12 +137,45 @@ public class ClockService {
 
     }
 
-    /**
-     * 调用恒信接口打卡
-     */
-    public String hxDaka(){
+
+
+    public List<HxUser> getHxUser(){
+        SysParamDO paramDO = sysParamDAO.findOneByCode("clock_hx_users");
+        String value = paramDO.getValue();
+        Gson gson = new Gson();
+        return gson.fromJson(value, new TypeToken<List<HxUser>>(){}.getType());
+    }
+
+    public String doHxClock(String name){
+        //准备参数
+        List<HxUser> userList = getHxUser();
+        HxUser doUser = null;
+        for (HxUser user : userList) {
+            if (name.equals(user.getName())){
+                doUser = user;
+            }
+        }
+        if (doUser == null){
+            throw new CustomException("未查询到该用户!");
+        }
+        Address address = getOneAddress();
+        //调用接口
+        clockHx(doUser,address);
+
+        return "HX打卡成功！";
+
+    }
+
+    private void clockHx(HxUser user,Address address){
 
         long timeMillis = System.currentTimeMillis();
+        String encodeAddr;
+        try {
+            encodeAddr = URLEncoder.encode(address.getPlace(),"utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new CustomException("地址URL编码失败:"+e.getMessage());
+        }
 
         String url = "https://im.hfbank.com.cn:7778/webhtml/asi/kqrecordadd";
         HashMap<String,String> headers = new HashMap<>();
@@ -151,42 +187,46 @@ public class ClockService {
         headers.put("X-Requested-With","XMLHttpRequest");
         headers.put("Content-Type","application/json");
         String refStr = "https://im.hfbank.com.cn:7778/webhtml/kaoqing/attendance" +
-                "?account=rxhf15223" +
-                "&longitude=116.351957" +
-                "&fdimension=39.926758" +
+                "?account=" + user.getAccount() +
+                "&longitude=" + address.getLongitude() +
+                "&fdimension=" + address.getLatitude() +
                 "&altitude=0.0" +
-                "&addrname=%E5%8C%97%E4%BA%AC%E5%B8%82%E8%A5%BF%E5%9F%8E%E5%8C%BA%E9%98%9C%E6%88%90%E9%97%A8%E5%8C%97%E8%90%A5%E9%97%A8%E4%B8%9C%E9%87%8C" +
+                "&addrname="+ encodeAddr +
                 "&device_type=1&deviceuuid=&orgId=1&wifimac=02:00:00:00:00:00&wifissid=WIFI" +
                 "&time=" + timeMillis +
-                "&rxsig=86D6874763693B5A0BCAAF13DE7E55D8";
+                "&rxsig=" + user.getRxSig();
 
         headers.put("Referer",refStr);
-
         headers.put("Accept-Encoding","gzip, deflate");
         headers.put("Accept-Language","zh-CN,en-US;q=0.9");
-        headers.put("Cookie","RX-UID=w_zhangzhao; PHPSESSID=eghajpecpr8u305nlf4lanmal4; RX-ASAPPID=kaoqing");
+        headers.put("Cookie","RX-UID=" + user.getRxUid() + "; PHPSESSID=" + user.getPhpSessId() + "; RX-ASAPPID=kaoqing");
 
-
-
-        HashMap<String, String> map= new HashMap<>();
-        map.put("action", "asi/kqrecordadd");
-        map.put("account", "rxhf15223");
-        map.put("userid", "16203");
-        map.put("addrname", "百万庄大街8号");
-        map.put("longitude", "116.3565140");
-        map.put("fdimension", "39.9334068");
-        map.put("device_type", "1");
-        map.put("deviceuuid", "");
-        map.put("orgId", "1");
-        map.put("wifimac", "02:00:00:00:00:00");
-        map.put("wifissid", "WIFI");
-        map.put("is_field", "0");
+        HashMap<String, String> param= new HashMap<>();
+        param.put("action", "asi/kqrecordadd");
+        param.put("account", user.getAccount());
+        param.put("userid", user.getUserId());
+        param.put("addrname", address.getPlace());
+        param.put("longitude", address.getLongitude());
+        param.put("fdimension", address.getLatitude());
+        param.put("device_type", "1");
+        param.put("deviceuuid", "");
+        param.put("orgId", "1");
+        param.put("wifimac", "02:00:00:00:00:00");
+        param.put("wifissid", "WIFI");
+        param.put("is_field", "0");
 
         try {
-            Connection.Response post = HttpUtils.post(url,headers, JSON.toJSONString(map));
-            return "恒信打卡成功!";
+            Connection.Response post = HttpUtils.post(url,headers, JSON.toJSONString(param));
+            String body = post.body();
+            log.info("HX接口返回--"+body);
+            JSONObject jsonObject = JSON.parseObject(body);
+            String descStr = jsonObject.get("desc").toString();
+            if (!"成功".equals(descStr)){
+                throw new CustomException("打卡失败:" + body);
+            }
+
         } catch (IOException e) {
-            throw new CustomException(e.getMessage());
+            throw new CustomException("接口请求失败:" + e.getMessage());
         }
     }
 }

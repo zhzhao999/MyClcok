@@ -6,7 +6,7 @@ package top.zhzhao.myclock.web.vo;
 /**
  *
  *@author zhzhao
- *@version $ Id: aa.java,V 0.1 2020/1/9 15:07 zhzhao Exp $
+ *@version $ Id: User.java,V 0.1 2020/1/9 15:07 zhzhao Exp $
  */
 public class User {
     private String name;
