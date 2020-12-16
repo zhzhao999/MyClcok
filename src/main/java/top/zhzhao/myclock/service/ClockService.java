@@ -120,7 +120,7 @@ public class ClockService {
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         ResponseEntity<String> response = restTemplate.postForEntity( url, request , String.class );
         String body = response.getBody();
-        log.info("JBF接口返回--"+body);
+        log.info(user.getName() + " JBF接口返回--"+body);
         try {
             JSONObject jsonObject = JSON.parseObject(body);
             Object rsp_body = jsonObject.get("RSP_BODY");
@@ -218,7 +218,7 @@ public class ClockService {
         try {
             Connection.Response post = HttpUtils.post(url,headers, JSON.toJSONString(param));
             String body = post.body();
-            log.info("HX接口返回--"+body);
+            log.info(user.getName() + " HX接口返回--"+body);
             JSONObject jsonObject = JSON.parseObject(body);
             String descStr = jsonObject.get("desc").toString();
             if (!"成功".equals(descStr)){
