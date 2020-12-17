@@ -205,9 +205,9 @@ public class ClockService {
         param.put("action", "asi/kqrecordadd");
         param.put("account", user.getAccount());
         param.put("userid", user.getUserId());
-        param.put("addrname", address.getPlace());
-        param.put("longitude", address.getLongitude());
-        param.put("fdimension", address.getLatitude());
+        param.put("addrname", "百万庄大街8号");
+        param.put("longitude", "116.3565140");
+        param.put("fdimension", "39.9334068");
         param.put("device_type", "1");
         param.put("deviceuuid", "");
         param.put("orgId", "1");
