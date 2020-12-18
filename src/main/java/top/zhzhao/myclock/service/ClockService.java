@@ -111,7 +111,7 @@ public class ClockService {
         map.add("loginName", user.getLoginName());
         map.add("latitude", address.getLatitude());
         map.add("longitude", address.getLongitude());
-        map.add("place", address.getPlace());
+        map.add("place", "北京市西城区展览路街道北京凌奇印刷有限责任公司百万庄大街13号院");
         map.add("flag", "1");
         map.add("groupId", "1");
         map.add("projectNo", "RD-19-0973-01");
